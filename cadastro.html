@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro - ONG</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        form { max-width: 500px; margin: auto; display: flex; flex-direction: column; gap: 15px; }
+        label { font-weight: bold; margin-bottom: 5px; }
+        input, select, textarea, button { padding: 10px; font-size: 1rem; border-radius: 5px; border: 1px solid #ccc; }
+        button { background-color: #4CAF50; color: white; border: none; cursor: pointer; }
+        button:hover { background-color: #45a049; }
+        #msgSucesso { display: none; padding: 10px; margin-top: 10px; border-radius: 5px; background-color: #4CAF50; color: white; font-weight: bold; text-align: center; }
+    </style>
+</head>
+<body>
+
+    <h1>Cadastro de Voluntário / Doador</h1>
+
+    <form id="formCadastro">
+        <input type="text" name="nome" placeholder="Nome Completo" required>
+        <input type="email" name="email" placeholder="E-mail" required>
+        <input type="text" id="cpf" name="cpf" placeholder="CPF" required>
+        <input type="text" id="telefone" name="telefone" placeholder="Telefone" required>
+
+        <label for="nascimento">Data de Nascimento</label>
+        <input type="date" id="nascimento" name="nascimento" required>
+
+        <input type="text" name="endereco" placeholder="Endereço" required>
+        <input type="text" id="cep" name="cep" placeholder="CEP" required>
+        <input type="text" name="cidade" placeholder="Cidade" required>
+        <select name="estado" required>
+            <option value="">Selecione o Estado</option>
+            <option value="SP">São Paulo</option>
+            <option value="RJ">Rio de Janeiro</option>
+            <option value="MG">Minas Gerais</option>
+            <!-- Adicione os demais estados -->
+        </select>
+
+        <button type="submit">Enviar Cadastro</button>
+
+        <div id="msgSucesso">Formulário validado com sucesso!</div>
+    </form>
+
+    <script>
+        /* --- Funções de máscara --- */
+        function aplicarMascara(campo, mascara) {
+            campo.addEventListener('input', (e) => {
+                let valor = e.target.value.replace(/\D/g, '');
+                let i = 0;
+                let novoValor = '';
+                for (let char of mascara) {
+                    if (char === '#') {
+                        if (valor[i] !== undefined) novoValor += valor[i++];
+                    } else {
+                        novoValor += char;
+                    }
+                }
+                e.target.value = novoValor;
+            });
+        }
+
+        /* --- Seleção dos inputs --- */
+        const cpfInput = document.getElementById('cpf');
+        const telInput = document.getElementById('telefone');
+        const cepInput = document.getElementById('cep');
+
+        aplicarMascara(cpfInput, '###.###.###-##');
+        aplicarMascara(telInput, '(##) #####-####');
+        aplicarMascara(cepInput, '#####-###');
+
+        /* --- Limpar mensagens de erro enquanto o usuário digita --- */
+        cpfInput.addEventListener('input', () => { cpfInput.setCustomValidity(''); });
+        telInput.addEventListener('input', () => { telInput.setCustomValidity(''); });
+        cepInput.addEventListener('input', () => { cepInput.setCustomValidity(''); });
+
+        /* --- Validação ao enviar o formulário --- */
+        const form = document.getElementById('formCadastro');
+        form.addEventListener('submit', (ev) => {
+            ev.preventDefault();
+            let valid = true;
+
+            // limpa mensagens antigas
+            cpfInput.setCustomValidity('');
+            telInput.setCustomValidity('');
+            cepInput.setCustomValidity('');
+
+            // valida CPF
+            const cpfDigits = cpfInput.value.replace(/\D/g, '');
+            if (cpfDigits.length !== 11) {
+                cpfInput.setCustomValidity('CPF inválido.');
+                cpfInput.reportValidity();
+                valid = false;
+            }
+
+            // valida telefone
+            const telDigits = telInput.value.replace(/\D/g, '');
+            if (telDigits.length < 10 || telDigits.length > 11) {
+                telInput.setCustomValidity('Telefone inválido.');
+                telInput.reportValidity();
+                valid = false;
+            }
+
+            // valida CEP
+            const cepDigits = cepInput.value.replace(/\D/g, '');
+            if (cepDigits.length !== 8) {
+                cepInput.setCustomValidity('CEP inválido.');
+                cepInput.reportValidity();
+                valid = false;
+            }
+
+            // se todos os campos corretos
+            if (valid && form.checkValidity()) {
+                const msg = document.getElementById('msgSucesso');
+                msg.style.display = 'block';
+                setTimeout(() => { msg.style.display = 'none'; }, 3000);
+                form.reset();
+            }
+        });
+    </script>
+
+</body>
+</html>
